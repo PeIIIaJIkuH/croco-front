@@ -1,30 +1,18 @@
-import { Button, Input } from '@mantine/core'
-import { useForm } from '@mantine/form'
+import { Button } from '@mantine/core'
+import { useRouter } from 'next/router'
 import { FC } from 'react'
-
-import s from './CreateRoom.module.css'
-
-interface IFormValues {
-	name: string
-}
+import { v4 } from 'uuid'
 
 export const CreateRoom: FC = () => {
-	const form = useForm<IFormValues>({
-		initialValues: {
-			name: '',
-		},
-	})
+	const router = useRouter()
 
-	const onSubmit = form.onSubmit(async ({ name }) => {
-		if (!name) return
-	})
+	const onClick = () => {
+		router.push(`/room/${v4()}`)
+	}
 
 	return (
-		<form onSubmit={onSubmit} className={s.wrapper}>
-			<Input {...form.getInputProps('name')} placeholder='Enter your name' />
-			<Button mt='md' className={s.button} variant='gradient' type='submit'>
-				Create room
-			</Button>
-		</form>
+		<Button mt='md' variant='gradient' onClick={onClick}>
+			Create room
+		</Button>
 	)
 }
