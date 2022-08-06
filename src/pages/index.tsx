@@ -1,11 +1,12 @@
 import type { NextPage } from 'next'
-import { Button } from '@mantine/core'
+import { Paper } from '@mantine/core'
+import s from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
     return (
-        <div>
-            <Button>Create room</Button>
-        </div>
+        <Paper className={s.wrapper} radius={0}>
+            
+        </Paper>
     )
 }
 
