@@ -1,11 +1,14 @@
-import { MantineProvider } from '@mantine/core'
+import { MantineProvider, Paper } from '@mantine/core'
 import type { AppProps } from 'next/app'
+import React from 'react'
 import '../styles/globals.css'
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
 	return (
 		<MantineProvider withNormalizeCSS>
-			<Component {...pageProps} />
+			<Paper className='wrapper' radius={0}>
+				<Component {...pageProps} />
+			</Paper>
 		</MantineProvider>
 	)
 }
