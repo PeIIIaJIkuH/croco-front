@@ -37,6 +37,7 @@ export const Canvas: FC = () => {
 
 		return () => {
 			document.removeEventListener('mousemove', onMouseMove)
+			window.removeEventListener('resize', resize)
 		}
 	}, [cursorCtx, paintCtx])
 
