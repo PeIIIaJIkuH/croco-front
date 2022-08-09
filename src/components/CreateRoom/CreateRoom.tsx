@@ -18,6 +18,7 @@ export const CreateRoom: FC = () => {
 	const onSubmit = form.onSubmit(({name}) => {
 		if (!name) return
 		userState.setName(name)
+		userState.setIsHost(true)
 		socketState.setRoomId(v4())
 		router.push('/room')
 	})

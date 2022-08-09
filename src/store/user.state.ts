@@ -1,11 +1,8 @@
 import {makeAutoObservable} from 'mobx'
-import {v4} from 'uuid'
-import {UserType} from '../types'
 
 class UserState {
 	name: string | null = null
-	type: UserType | null = null
-	id = v4()
+	isHost: boolean = false
 
 	constructor() {
 		makeAutoObservable(this)
@@ -15,13 +12,13 @@ class UserState {
 		this.name = name
 	}
 
-	setType(type: UserType | null) {
-		this.type = type
+	setIsHost(isHost: boolean) {
+		this.isHost = isHost
 	}
 
 	reset() {
 		this.setName(null)
-		this.setType(null)
+		this.setIsHost(false)
 	}
 }
 

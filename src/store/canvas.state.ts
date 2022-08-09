@@ -7,6 +7,7 @@ class CanvasState {
 	type: CanvasType = 'pencil'
 	thickness: CanvasThickness = 5
 	color: MantineColor = 'black'
+	scale: number = 1
 	undoList: CanvasAction[] = []
 	redoList: CanvasAction[] = []
 
@@ -28,6 +29,10 @@ class CanvasState {
 
 	setColor(color: MantineColor) {
 		this.color = color
+	}
+
+	setScale(scale: number) {
+		this.scale = scale
 	}
 
 	resetRedoList() {
@@ -70,8 +75,7 @@ class CanvasState {
 
 	clearPaintCanvas() {
 		const ctx = this.paintCanvas?.getContext('2d')
-		const size = Math.min(window.innerWidth, window.innerHeight)
-		ctx?.clearRect(0, 0, size, size)
+		ctx?.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 	}
 
 	undo() {

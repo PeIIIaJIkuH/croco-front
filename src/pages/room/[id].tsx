@@ -25,8 +25,6 @@ const JoinRoom: NextPage = observer(() => {
 
 	useEffect(() => {
 		if (id) {
-			// check if this room id exists in backend
-			// if it doesn't exist, then raise eror or go to main page
 			socketState.setRoomId(id)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
