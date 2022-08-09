@@ -82,7 +82,7 @@ export const Canvas: FC = observer(() => {
 		paintCtx?.stroke()
 		paintCtx?.closePath()
 		if (drawing && userState.isHost) {
-			socketState.socket?.emit('drawToServer', drawing)
+			socketState.socket?.emit('drawToServer', {roomId: socketState.roomId, drawing})
 		}
 	}
 
@@ -148,6 +148,7 @@ export const Canvas: FC = observer(() => {
 	useEffect(() => {
 		if (!socketState.socket) return
 		socketState.socket.on('drawToClient', (drawing: CanvasDrawing) => {
+			console.log('-------------', drawing)
 			drawPaint(drawing)
 		})
 
@@ -177,13 +178,13 @@ export const Canvas: FC = observer(() => {
 		['ctrl+Z', () => {
 			if (userState.isHost) {
 				canvasState.undo()
-				socketState.socket?.emit('undoToServer')
+				socketState.socket?.emit('undoToServer', socketState.roomId)
 			}
 		}],
 		['ctrl+shift+Z', () => {
 			if (userState.isHost) {
 				canvasState.redo()
-				socketState.socket?.emit('redoToServer')
+				socketState.socket?.emit('redoToServer', socketState.roomId)
 			}
 		}],
 	])

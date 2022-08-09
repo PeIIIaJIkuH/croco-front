@@ -13,6 +13,9 @@ class SocketState {
 
 	setRoomId(id: string | null) {
 		this.roomId = id
+		if (id) {
+			this.socket?.emit('room', id)
+		}
 	}
 
 	reset() {
@@ -21,10 +24,6 @@ class SocketState {
 
 	initSocket() {
 		this.socket = io('http://localhost:5000/canvas')
-
-		this.socket.on('connect', () => {
-			this.socket?.emit('room', this.roomId)
-		})
 	}
 }
 

@@ -49,21 +49,21 @@ export const RightActions: FC = observer(() => {
 		Icon: IconArrowBackUp,
 		onClick: () => {
 			canvasState.undo()
-			userState.isHost && socketState.socket?.emit('undoToServer')
+			userState.isHost && socketState.socket?.emit('undoToServer', socketState.roomId)
 		},
 	}, {
 		name: 'redo',
 		Icon: IconArrowForwardUp,
 		onClick: () => {
 			canvasState.redo()
-			userState.isHost && socketState.socket?.emit('redoToServer')
+			userState.isHost && socketState.socket?.emit('redoToServer', socketState.roomId)
 		},
 	}, {
 		name: 'reset',
 		Icon: IconTrash,
 		onClick: () => {
 			canvasState.reset()
-			userState.isHost && socketState.socket?.emit('resetToServer')
+			userState.isHost && socketState.socket?.emit('resetToServer', socketState.roomId)
 		},
 	}]
 
