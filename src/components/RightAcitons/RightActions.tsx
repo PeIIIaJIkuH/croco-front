@@ -1,7 +1,10 @@
-import {ActionIcon, clsx} from '@mantine/core'
+import {ActionIcon, Button, clsx} from '@mantine/core'
+import {useClipboard} from '@mantine/hooks'
 import {
 	IconArrowBackUp,
 	IconArrowForwardUp,
+	IconCheck,
+	IconCopy,
 	IconEraser,
 	IconPencil,
 	IconPoint,
@@ -11,11 +14,12 @@ import {
 import {observer} from 'mobx-react-lite'
 import {FC} from 'react'
 import {COLORS} from '../../constants'
-import canvasState from '../../store/canvas-state'
+import canvasState from '../../store/canvas.state'
+import socketState from '../../store/socket.state'
 import {CanvasThickness} from '../../types'
 import s from './RightActions.module.css'
 
-type Type = 'pencil' | 'eraser' | 'undo' | 'redo' | 'reset'
+type Type = 'pencil' | 'eraser' | 'undo' | 'redo' | 'reset' | 'copy'
 
 type Button = {
 	name: Type
@@ -25,6 +29,8 @@ type Button = {
 }
 
 export const RightActions: FC = observer(() => {
+	const {copy, copied} = useClipboard()
+
 	const actions: Button[] = [{
 		name: 'pencil',
 		Icon: IconPencil,
@@ -42,18 +48,27 @@ export const RightActions: FC = observer(() => {
 		Icon: IconArrowBackUp,
 		onClick: () => {
 			canvasState.undo()
+			// send strings to api just to signal this type of action
 		},
 	}, {
 		name: 'redo',
 		Icon: IconArrowForwardUp,
 		onClick: () => {
 			canvasState.redo()
+			// send strings to api just to signal this type of action
 		},
 	}, {
 		name: 'reset',
 		Icon: IconTrash,
 		onClick: () => {
 			canvasState.reset()
+			// send strings to api just to signal this type of action
+		},
+	}, {
+		name: 'copy',
+		Icon: copied ? IconCheck : IconCopy,
+		onClick: () => {
+			copy(`http://localhost:3000/room/${socketState.roomId}`)
 		},
 	}]
 

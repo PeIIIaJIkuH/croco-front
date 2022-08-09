@@ -16,3 +16,9 @@ export interface CanvasDrawing {
 }
 
 export type CanvasAction = CanvasDrawing | 'reset'
+
+export type UserType = 'host' | 'guest'
+
+export interface IFormValues {
+	name: string
+}

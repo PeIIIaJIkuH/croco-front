@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.10.0",
     "@mantine/core": "^5.0.3",
+    "@mantine/form": "^5.1.1",
     "@mantine/hooks": "^5.0.3",
     "@tabler/icons": "^1.79.0",
     "@types/uuid": "^8.3.4",

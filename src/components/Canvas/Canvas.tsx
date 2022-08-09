@@ -2,7 +2,7 @@ import {clsx} from '@mantine/core'
 import {useHotkeys} from '@mantine/hooks'
 import {observer} from 'mobx-react-lite'
 import {FC, useEffect, useRef} from 'react'
-import canvasState from '../../store/canvas-state'
+import canvasState from '../../store/canvas.state'
 import {CanvasDrawing, CanvasPoint} from '../../types'
 import s from './Canvas.module.css'
 
@@ -35,6 +35,11 @@ export const Canvas: FC = observer(() => {
 		}
 	}
 
+	const addPoint = (point: CanvasPoint) => {
+		drawing.points.push({...point})
+		// send data to api with thickness and color
+	}
+
 	const drawTemp = (e: MouseEvent) => {
 		const tempCtx = tempRef.current!.getContext('2d')
 		tempCtx && (tempCtx.lineWidth = (Math.max(canvasState.thickness - 1, 1)) * 2)
@@ -42,9 +47,9 @@ export const Canvas: FC = observer(() => {
 		tempCtx && (tempCtx.strokeStyle = canvasState.type === 'eraser' ? 'white' : canvasState.color)
 		tempCtx?.beginPath()
 		tempCtx?.moveTo(point.x, point.y)
-		drawing.points.push({...point})
+		addPoint(point)
 		point = getPoint(e, tempRef.current!.getBoundingClientRect())
-		drawing.points.push({...point})
+		addPoint(point)
 		tempCtx?.lineTo(point.x, point.y)
 		tempCtx?.stroke()
 		tempCtx?.closePath()
@@ -74,7 +79,7 @@ export const Canvas: FC = observer(() => {
 		const paintCtx = paintRef.current!.getContext('2d')
 		paintCtx && (paintCtx.lineCap = 'round')
 		paintCtx && (paintCtx.lineWidth = Math.max(drawing.thickness - 1, 1) * 2)
-		paintCtx && (paintCtx.strokeStyle = drawing.color)
+		paintCtx && (paintCtx.strokeStyle = canvasState.type === 'eraser' ? 'white' : drawing.color)
 		paintCtx?.beginPath()
 		paintCtx?.moveTo(drawing.points[0].x, drawing.points[1].y)
 		paintCtx?.lineTo(drawing.points[0].x, drawing.points[1].y)
