@@ -97,6 +97,8 @@ export const Canvas: FC = observer(() => {
 	}
 
 	const start = (e: MouseEvent) => {
+		const {left, top, right, bottom} = cursorRef.current!.getBoundingClientRect()
+		if (e.clientX < left || e.clientY < top || e.clientX > right || e.clientY > bottom) return
 		drawing = {
 			points: [],
 			color: canvasState.color,
@@ -106,7 +108,9 @@ export const Canvas: FC = observer(() => {
 		drawTemp(e)
 	}
 
-	const end = () => {
+	const end = (e: MouseEvent) => {
+		const {left, top, right, bottom} = cursorRef.current!.getBoundingClientRect()
+		if ((e.clientX < left || e.clientY < top || e.clientX > right || e.clientY > bottom) && !isDrawing) return
 		isDrawing = false
 		const tempCtx = tempRef.current!.getContext('2d')
 		const size = Math.min(window.innerWidth, window.innerHeight)
@@ -125,15 +129,15 @@ export const Canvas: FC = observer(() => {
 
 		init()
 		document.addEventListener('mousemove', move)
-		cursorCanvasElement.addEventListener('mousedown', start)
-		cursorCanvasElement.addEventListener('mouseup', end)
+		document.addEventListener('mousedown', start)
+		document.addEventListener('mouseup', end)
 		cursorCanvasElement.addEventListener('contextmenu', onRightClick)
 
 		return () => {
 			canvasState.setPaintCanvas(null)
 			document.removeEventListener('mousemove', move)
-			cursorCanvasElement.removeEventListener('mousedown', start)
-			cursorCanvasElement.removeEventListener('mouseup', end)
+			document.removeEventListener('mousedown', start)
+			document.removeEventListener('mouseup', end)
 			cursorCanvasElement.removeEventListener('contextmenu', onRightClick)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
