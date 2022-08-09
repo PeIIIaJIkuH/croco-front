@@ -127,7 +127,6 @@ export const Canvas: FC = observer(() => {
 		document.addEventListener('mousemove', move)
 		cursorCanvasElement.addEventListener('mousedown', start)
 		cursorCanvasElement.addEventListener('mouseup', end)
-		cursorCanvasElement.addEventListener('mouseleave', end)
 		cursorCanvasElement.addEventListener('contextmenu', onRightClick)
 
 		return () => {
@@ -135,7 +134,6 @@ export const Canvas: FC = observer(() => {
 			document.removeEventListener('mousemove', move)
 			cursorCanvasElement.removeEventListener('mousedown', start)
 			cursorCanvasElement.removeEventListener('mouseup', end)
-			cursorCanvasElement.removeEventListener('mouseleave', end)
 			cursorCanvasElement.removeEventListener('contextmenu', onRightClick)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
