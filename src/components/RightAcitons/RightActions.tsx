@@ -76,7 +76,7 @@ export const RightActions: FC = observer(() => {
 				{thicknesses.map((thickness) => (
 					<ActionIcon
 						key={thickness} className={clsx(s.button, thickness === canvasState.thickness && s.active)}
-						variant={thickness === canvasState.thickness ? 'filled' : 'subtle'}
+						variant={thickness === canvasState.thickness ? 'filled' : 'subtle'} size='lg'
 						onClick={() => canvasState.setThickness(thickness)}
 					>
 						<IconPoint size={thickness + 10} color='white'/>
@@ -87,10 +87,8 @@ export const RightActions: FC = observer(() => {
 				{COLORS.map((color, index) => (
 					<ActionIcon
 						key={index} className={clsx(s.button, color === canvasState.color && s.active)}
-						variant={color === canvasState.color ? 'filled' : 'subtle'}
-						onClick={() => {
-							canvasState.setColor(color)
-						}}
+						variant={color === canvasState.color ? 'filled' : 'subtle'} size='lg'
+						onClick={() => canvasState.setColor(color)}
 					>
 						<IconPoint size={40} color={color} fill={color}/>
 					</ActionIcon>
