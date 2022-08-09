@@ -1,9 +1,9 @@
-import type { NextPage } from 'next'
-import { CreateRoom } from '../components'
+import type {NextPage} from 'next'
+import {CreateRoom} from '../components'
 
 const Home: NextPage = () => {
 	return (
-		<CreateRoom />
+		<CreateRoom/>
 	)
 }
 

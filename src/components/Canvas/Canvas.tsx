@@ -1,62 +1,25 @@
-import { clsx } from '@mantine/core'
-import { FC, useEffect, useRef } from 'react'
+import {clsx} from '@mantine/core'
+import {useHotkeys} from '@mantine/hooks'
+import {observer} from 'mobx-react-lite'
+import {FC, useEffect, useRef} from 'react'
+import canvasState from '../../store/canvas-state'
+import {CanvasDrawing, CanvasPoint} from '../../types'
 import s from './Canvas.module.css'
 
-export const Canvas: FC = () => {
+export const Canvas: FC = observer(() => {
 	const cursorRef = useRef<HTMLCanvasElement>(null)
 	const tempRef = useRef<HTMLCanvasElement>(null)
 	const paintRef = useRef<HTMLCanvasElement>(null)
 
 	let isDrawing = false
-	const coords = {
-		x: 0,
-		y: 0,
+	let point: CanvasPoint
+	let drawing: CanvasDrawing = {
+		points: [],
+		color: canvasState.color,
+		thickness: canvasState.thickness,
 	}
 
-	const updatePosition = (e: MouseEvent, { left, top, width, height }: DOMRect) => {
-		const size = Math.min(window.innerWidth, window.innerHeight)
-		coords.x = (e.clientX - left) * (size / width)
-		coords.y = (e.clientY - top) * (size / height)
-	}
-
-	const draw = (e: MouseEvent) => {
-		const tempCtx = tempRef.current!.getContext('2d')
-		tempCtx && (tempCtx.lineWidth = 20)
-		tempCtx && (tempCtx.lineCap = 'round')
-		tempCtx?.beginPath()
-		tempCtx?.moveTo(coords.x, coords.y)
-		updatePosition(e, tempRef.current!.getBoundingClientRect())
-		tempCtx?.lineTo(coords.x, coords.y)
-		tempCtx?.stroke()
-	}
-
-	const onMouseMove = (e: MouseEvent) => {
-		const cursorCtx = cursorRef.current!.getContext('2d')
-		if (isDrawing) {
-			draw(e)
-		} else {
-			updatePosition(e, cursorRef.current!.getBoundingClientRect())
-		}
-		const size = Math.min(window.innerWidth, window.innerHeight)
-		cursorCtx?.clearRect(0, 0, size, size)
-		cursorCtx?.beginPath()
-		cursorCtx?.arc(coords.x, coords.y, 10, 0, Math.PI * 2)
-		cursorCtx?.stroke()
-	}
-
-	const onMouseDown = (e: MouseEvent) => {
-		draw(e)
-		isDrawing = true
-	}
-
-	const onMouseUp = (e: MouseEvent) => {
-		const tempCtx = tempRef.current!.getContext('2d')
-		const size = Math.min(window.innerWidth, window.innerHeight)
-		tempCtx?.clearRect(0, 0, size, size)
-		isDrawing = false
-	}
-
-	const resize = () => {
+	const init = () => {
 		const cursorCtx = cursorRef.current!.getContext('2d')
 		const tempCtx = tempRef.current!.getContext('2d')
 		const paintCtx = paintRef.current!.getContext('2d')
@@ -64,31 +27,131 @@ export const Canvas: FC = () => {
 			const size = Math.min(window.innerWidth, window.innerHeight)
 			cursorCtx.canvas.width = cursorCtx.canvas.height = size
 			tempCtx.canvas.width = tempCtx.canvas.height = size
-			paintCtx.canvas.height = paintCtx.canvas.height = size
+			paintCtx.canvas.height = paintCtx.canvas.width = size
 		}
 	}
 
+	const getPoint = (e: MouseEvent, {left, top, width, height}: DOMRect): CanvasPoint => {
+		const size = Math.min(window.innerWidth, window.innerHeight)
+		return {
+			x: (e.clientX - left) * (size / width),
+			y: (e.clientY - top) * (size / height),
+		}
+	}
+
+	const drawTemp = (e: MouseEvent) => {
+		const tempCtx = tempRef.current!.getContext('2d')
+		tempCtx && (tempCtx.lineWidth = (Math.max(canvasState.thickness - 1, 1)) * 2)
+		tempCtx && (tempCtx.lineCap = 'round')
+		tempCtx &&
+		(tempCtx.fillStyle = tempCtx.strokeStyle = (canvasState.type === 'eraser' ? 'white' : canvasState.color))
+		tempCtx?.beginPath()
+		tempCtx?.moveTo(point.x, point.y)
+		drawing.points.push({...point})
+		point = getPoint(e, tempRef.current!.getBoundingClientRect())
+		drawing.points.push({...point})
+		tempCtx?.lineTo(point.x, point.y)
+		tempCtx?.stroke()
+	}
+
+	const drawCursor = () => {
+		const cursorCtx = cursorRef.current!.getContext('2d')
+		const size = Math.min(window.innerWidth, window.innerHeight)
+		cursorCtx && (cursorCtx.lineWidth = 2)
+		cursorCtx?.clearRect(0, 0, size, size)
+		cursorCtx?.beginPath()
+		cursorCtx?.arc(point.x, point.y, canvasState.thickness, 0, Math.PI * 2)
+		cursorCtx?.moveTo(point.x + canvasState.thickness + 5, point.y)
+		cursorCtx?.lineTo(point.x + canvasState.thickness + 20, point.y)
+		cursorCtx?.moveTo(point.x - canvasState.thickness - 5, point.y)
+		cursorCtx?.lineTo(point.x - canvasState.thickness - 20, point.y)
+		cursorCtx?.moveTo(point.x, point.y + canvasState.thickness + 5)
+		cursorCtx?.lineTo(point.x, point.y + canvasState.thickness + 20)
+		cursorCtx?.moveTo(point.x, point.y - canvasState.thickness - 5)
+		cursorCtx?.lineTo(point.x, point.y - canvasState.thickness - 20)
+		cursorCtx?.stroke()
+	}
+
+	const drawPaint = () => {
+		if (!drawing?.points?.length) return
+		const paintCtx = paintRef.current!.getContext('2d')
+		paintCtx && (paintCtx.lineCap = 'round')
+		paintCtx && (paintCtx.lineWidth = Math.max(drawing.thickness - 1, 1) * 2)
+		paintCtx && (paintCtx.strokeStyle = paintCtx.fillStyle = drawing.color)
+		paintCtx?.beginPath()
+		paintCtx?.moveTo(drawing.points[0].x, drawing.points[1].y)
+		paintCtx?.lineTo(drawing.points[0].x, drawing.points[1].y)
+		for (let i = 1; i < drawing.points.length; i++) {
+			const point = drawing.points[i]
+			paintCtx?.lineTo(point.x, point.y)
+			paintCtx?.moveTo(point.x, point.y)
+		}
+		paintCtx?.stroke()
+		paintCtx?.closePath()
+	}
+
+	const move = (e: MouseEvent) => {
+		if (isDrawing) {
+			drawTemp(e)
+		} else {
+			point = getPoint(e, cursorRef.current!.getBoundingClientRect())
+		}
+		drawCursor()
+	}
+
+	const start = (e: MouseEvent) => {
+		drawing = {
+			points: [],
+			color: canvasState.color,
+			thickness: canvasState.thickness,
+		}
+		isDrawing = true
+		drawTemp(e)
+	}
+
+	const end = () => {
+		isDrawing = false
+		const tempCtx = tempRef.current!.getContext('2d')
+		const size = Math.min(window.innerWidth, window.innerHeight)
+		tempCtx?.clearRect(0, 0, size, size)
+		canvasState.addUndoDrawing(drawing, true)
+		drawPaint()
+	}
+
+	const onRightClick = (e: MouseEvent) => {
+		e.preventDefault()
+	}
+
 	useEffect(() => {
-		resize()
-		document.addEventListener('mousemove', onMouseMove)
-		document.addEventListener('mousedown', onMouseDown)
-		document.addEventListener('mouseup', onMouseUp)
-		window.addEventListener('resize', resize)
+		canvasState.setPaintCanvas(paintRef.current)
+		const cursorCanvasElement = cursorRef.current!
+
+		init()
+		document.addEventListener('mousemove', move)
+		cursorCanvasElement.addEventListener('mousedown', start)
+		cursorCanvasElement.addEventListener('mouseup', end)
+		cursorCanvasElement.addEventListener('contextmenu', onRightClick)
 
 		return () => {
-			document.removeEventListener('mousemove', onMouseMove)
-			document.removeEventListener('mousedown', onMouseDown)
-			document.removeEventListener('mouseup', onMouseUp)
-			window.removeEventListener('resize', resize)
+			canvasState.setPaintCanvas(null)
+			document.removeEventListener('mousemove', move)
+			cursorCanvasElement.removeEventListener('mousedown', start)
+			cursorCanvasElement.removeEventListener('contextmenu', onRightClick)
+			cursorCanvasElement.removeEventListener('mouseup', end)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [cursorRef.current, tempRef.current, paintRef.current])
 
+	useHotkeys([
+		['ctrl+Z', () => canvasState.undo()],
+		['ctrl+shift+Z', () => canvasState.redo()],
+	])
+
 	return (
 		<div className={s.wrapper}>
-			<canvas className={clsx(s.canvas, s.cursor)} ref={cursorRef} />
-			<canvas className={clsx(s.canvas, s.temp)} ref={tempRef} />
-			<canvas className={clsx(s.canvas, s.paint)} ref={paintRef} />
+			<canvas className={clsx(s.canvas, s.cursor)} ref={cursorRef}/>
+			<canvas className={clsx(s.canvas, s.temp)} ref={tempRef}/>
+			<canvas className={clsx(s.canvas, s.paint)} ref={paintRef}/>
 		</div>
 	)
-}
+})
