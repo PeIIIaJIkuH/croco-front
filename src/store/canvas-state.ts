@@ -34,12 +34,20 @@ class CanvasState {
 		this.redoList = []
 	}
 
-	addUndoDrawing(action: CanvasAction, clearRedoList = false) {
+	deleteLastUndoAction() {
+		this.undoList = this.undoList.filter((_, i) => i < this.undoList.length - 1)
+	}
+
+	deleteLastRedoAction() {
+		this.redoList = this.redoList.filter((_, i) => i < this.redoList.length - 1)
+	}
+
+	addUndoAction(action: CanvasAction, clearRedoList = false) {
 		this.undoList.push(action)
 		clearRedoList && this.resetRedoList()
 	}
 
-	addRedoPoints(action: CanvasAction) {
+	addRedoAction(action: CanvasAction) {
 		this.redoList.push(action)
 	}
 
@@ -76,23 +84,25 @@ class CanvasState {
 
 	undo() {
 		if (this.undoList.length === 0) return
+		const action = this.undoList[this.undoList.length - 1]
+		this.deleteLastUndoAction()
+		this.addRedoAction(action)
 		this.clearPaintCanvas()
-		const points = this.undoList.splice(this.undoList.length - 1, 1)[0]
-		this.addRedoPoints(points)
 		this.drawFromUndoList()
 	}
 
 	redo() {
 		if (this.redoList.length === 0) return
+		const action = this.redoList[this.redoList.length - 1]
+		this.deleteLastRedoAction()
+		this.addUndoAction(action, false)
 		this.clearPaintCanvas()
-		const points = this.redoList.splice(this.redoList.length - 1, 1)[0]
-		this.addUndoDrawing(points, false)
 		this.drawFromUndoList()
 	}
 
 	reset() {
 		this.clearPaintCanvas()
-		this.addUndoDrawing('reset', true)
+		this.addUndoAction('reset', true)
 	}
 }
 

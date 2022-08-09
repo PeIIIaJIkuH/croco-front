@@ -111,7 +111,7 @@ export const Canvas: FC = observer(() => {
 		const tempCtx = tempRef.current!.getContext('2d')
 		const size = Math.min(window.innerWidth, window.innerHeight)
 		tempCtx?.clearRect(0, 0, size, size)
-		drawing && canvasState.addUndoDrawing(drawing, true)
+		drawing && canvasState.addUndoAction(drawing, true)
 		drawPaint()
 	}
 
