@@ -1,14 +1,14 @@
-import {DefaultMantineColor, MantineColor} from '@mantine/core'
+import {MantineColor} from '@mantine/core'
 import {makeAutoObservable} from 'mobx'
-import {CanvasDrawing, CanvasThickness, CanvasType} from '../types'
+import {CanvasAction, CanvasThickness, CanvasType} from '../types'
 
 class CanvasState {
 	paintCanvas: HTMLCanvasElement | null = null
 	type: CanvasType = 'pencil'
 	thickness: CanvasThickness = 5
 	color: MantineColor = 'black'
-	undoList: CanvasDrawing[] = []
-	redoList: CanvasDrawing[] = []
+	undoList: CanvasAction[] = []
+	redoList: CanvasAction[] = []
 
 	constructor() {
 		makeAutoObservable(this)
@@ -26,7 +26,7 @@ class CanvasState {
 		this.thickness = thickness
 	}
 
-	setColor(color: DefaultMantineColor) {
+	setColor(color: MantineColor) {
 		this.color = color
 	}
 
@@ -34,33 +34,37 @@ class CanvasState {
 		this.redoList = []
 	}
 
-	addUndoDrawing(drawing: CanvasDrawing, clearRedoList = false) {
-		this.undoList.push(drawing)
+	addUndoDrawing(action: CanvasAction, clearRedoList = false) {
+		this.undoList.push(action)
 		clearRedoList && this.resetRedoList()
 	}
 
-	addRedoPoints(drawing: CanvasDrawing) {
-		this.redoList.push(drawing)
+	addRedoPoints(action: CanvasAction) {
+		this.redoList.push(action)
 	}
 
 	drawFromUndoList() {
 		if (this.undoList.length === 0) return
 		const ctx = this.paintCanvas?.getContext('2d')
 		if (!ctx) return
-		for (const drawing of this.undoList) {
-			ctx.lineCap = 'round'
-			ctx.lineWidth = Math.max(drawing.thickness - 1, 1) * 2
-			ctx.strokeStyle = ctx.fillStyle = drawing.color
-			ctx.beginPath()
-			ctx.moveTo(drawing.points[0].x, drawing.points[0].y)
-			ctx.lineTo(drawing.points[0].x, drawing.points[0].y)
-			for (let i = 1; i < drawing.points.length; i++) {
-				const point = drawing.points[i]
-				ctx.lineTo(point.x, point.y)
-				ctx.moveTo(point.x, point.y)
+		for (const action of this.undoList) {
+			if (action === 'reset') {
+				this.clearPaintCanvas()
+			} else {
+				ctx.lineCap = 'round'
+				ctx.lineWidth = Math.max(action.thickness - 1, 1) * 2
+				ctx.strokeStyle = action.color
+				ctx.beginPath()
+				ctx.moveTo(action.points[0].x, action.points[0].y)
+				ctx.lineTo(action.points[0].x, action.points[0].y)
+				for (let i = 1; i < action.points.length; i++) {
+					const point = action.points[i]
+					ctx.lineTo(point.x, point.y)
+					ctx.moveTo(point.x, point.y)
+				}
+				ctx.stroke()
+				ctx.closePath()
 			}
-			ctx.stroke()
-			ctx.closePath()
 		}
 	}
 
@@ -84,6 +88,11 @@ class CanvasState {
 		const points = this.redoList.splice(this.redoList.length - 1, 1)[0]
 		this.addUndoDrawing(points, false)
 		this.drawFromUndoList()
+	}
+
+	reset() {
+		this.clearPaintCanvas()
+		this.addUndoDrawing('reset', true)
 	}
 }
 

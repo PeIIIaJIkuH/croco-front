@@ -13,11 +13,7 @@ export const Canvas: FC = observer(() => {
 
 	let isDrawing = false
 	let point: CanvasPoint
-	let drawing: CanvasDrawing = {
-		points: [],
-		color: canvasState.color,
-		thickness: canvasState.thickness,
-	}
+	let drawing: CanvasDrawing
 
 	const init = () => {
 		const cursorCtx = cursorRef.current!.getContext('2d')
@@ -43,8 +39,7 @@ export const Canvas: FC = observer(() => {
 		const tempCtx = tempRef.current!.getContext('2d')
 		tempCtx && (tempCtx.lineWidth = (Math.max(canvasState.thickness - 1, 1)) * 2)
 		tempCtx && (tempCtx.lineCap = 'round')
-		tempCtx &&
-		(tempCtx.fillStyle = tempCtx.strokeStyle = (canvasState.type === 'eraser' ? 'white' : canvasState.color))
+		tempCtx && (tempCtx.strokeStyle = canvasState.type === 'eraser' ? 'white' : canvasState.color)
 		tempCtx?.beginPath()
 		tempCtx?.moveTo(point.x, point.y)
 		drawing.points.push({...point})
@@ -52,6 +47,7 @@ export const Canvas: FC = observer(() => {
 		drawing.points.push({...point})
 		tempCtx?.lineTo(point.x, point.y)
 		tempCtx?.stroke()
+		tempCtx?.closePath()
 	}
 
 	const drawCursor = () => {
@@ -70,6 +66,7 @@ export const Canvas: FC = observer(() => {
 		cursorCtx?.moveTo(point.x, point.y - canvasState.thickness - 5)
 		cursorCtx?.lineTo(point.x, point.y - canvasState.thickness - 20)
 		cursorCtx?.stroke()
+		cursorCtx?.closePath()
 	}
 
 	const drawPaint = () => {
@@ -77,7 +74,7 @@ export const Canvas: FC = observer(() => {
 		const paintCtx = paintRef.current!.getContext('2d')
 		paintCtx && (paintCtx.lineCap = 'round')
 		paintCtx && (paintCtx.lineWidth = Math.max(drawing.thickness - 1, 1) * 2)
-		paintCtx && (paintCtx.strokeStyle = paintCtx.fillStyle = drawing.color)
+		paintCtx && (paintCtx.strokeStyle = drawing.color)
 		paintCtx?.beginPath()
 		paintCtx?.moveTo(drawing.points[0].x, drawing.points[1].y)
 		paintCtx?.lineTo(drawing.points[0].x, drawing.points[1].y)
@@ -130,14 +127,16 @@ export const Canvas: FC = observer(() => {
 		document.addEventListener('mousemove', move)
 		cursorCanvasElement.addEventListener('mousedown', start)
 		cursorCanvasElement.addEventListener('mouseup', end)
+		cursorCanvasElement.addEventListener('mouseleave', end)
 		cursorCanvasElement.addEventListener('contextmenu', onRightClick)
 
 		return () => {
 			canvasState.setPaintCanvas(null)
 			document.removeEventListener('mousemove', move)
 			cursorCanvasElement.removeEventListener('mousedown', start)
-			cursorCanvasElement.removeEventListener('contextmenu', onRightClick)
 			cursorCanvasElement.removeEventListener('mouseup', end)
+			cursorCanvasElement.removeEventListener('mouseleave', end)
+			cursorCanvasElement.removeEventListener('contextmenu', onRightClick)
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [cursorRef.current, tempRef.current, paintRef.current])

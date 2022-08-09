@@ -1,5 +1,13 @@
 import {ActionIcon, clsx} from '@mantine/core'
-import {IconArrowBackUp, IconArrowForwardUp, IconEraser, IconPencil, IconPoint, TablerIcon} from '@tabler/icons'
+import {
+	IconArrowBackUp,
+	IconArrowForwardUp,
+	IconEraser,
+	IconPencil,
+	IconPoint,
+	IconTrash,
+	TablerIcon,
+} from '@tabler/icons'
 import {observer} from 'mobx-react-lite'
 import {FC} from 'react'
 import {COLORS} from '../../constants'
@@ -7,7 +15,7 @@ import canvasState from '../../store/canvas-state'
 import {CanvasThickness} from '../../types'
 import s from './RightActions.module.css'
 
-type Type = 'pencil' | 'eraser' | 'undo' | 'redo'
+type Type = 'pencil' | 'eraser' | 'undo' | 'redo' | 'reset'
 
 type Button = {
 	name: Type
@@ -41,6 +49,12 @@ export const RightActions: FC = observer(() => {
 		onClick: () => {
 			canvasState.redo()
 		},
+	}, {
+		name: 'reset',
+		Icon: IconTrash,
+		onClick: () => {
+			canvasState.reset()
+		},
 	}]
 
 	const thicknesses: CanvasThickness[] = [1, 5, 10, 15]
@@ -65,7 +79,7 @@ export const RightActions: FC = observer(() => {
 						variant={thickness === canvasState.thickness ? 'filled' : 'subtle'}
 						onClick={() => canvasState.setThickness(thickness)}
 					>
-						<IconPoint size={thickness + 10}/>
+						<IconPoint size={thickness + 10} color='white'/>
 					</ActionIcon>
 				))}
 			</div>
@@ -74,7 +88,9 @@ export const RightActions: FC = observer(() => {
 					<ActionIcon
 						key={index} className={clsx(s.button, color === canvasState.color && s.active)}
 						variant={color === canvasState.color ? 'filled' : 'subtle'}
-						onClick={() => canvasState.setColor(color)}
+						onClick={() => {
+							canvasState.setColor(color)
+						}}
 					>
 						<IconPoint size={40} color={color} fill={color}/>
 					</ActionIcon>

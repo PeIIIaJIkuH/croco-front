@@ -14,3 +14,5 @@ export interface CanvasDrawing {
 	thickness: CanvasThickness
 	color: MantineColor
 }
+
+export type CanvasAction = CanvasDrawing | 'reset'
