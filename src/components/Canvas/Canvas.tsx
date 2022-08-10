@@ -179,6 +179,7 @@ export const Canvas: FC = observer(() => {
 
 	useEffect(() => {
 		const onUnload = (e: BeforeUnloadEvent) => {
+			if (!userState.isHost) return
 			e.preventDefault()
 			e.returnValue = ''
 			socketState.socket?.emit('leaveRoom')
