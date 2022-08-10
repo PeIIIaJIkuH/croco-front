@@ -112,8 +112,7 @@ export const RightActions: FC = observer(() => {
 			<div className={s.copyButton}>
 				<ActionIcon
 					size='lg' color='white' className={s.button}
-					onClick={() => copy(`${process.env.CROCO_URL ||
-					'http://localhost:3000'}/room/${socketState.roomId}`)}
+					onClick={() => copy(`https://croco-draw.netlify.app/room/${socketState.roomId}`)}
 				>
 					{copied ? <IconClipboardCheck color='white'/> : <IconClipboardCopy color='white'/>}
 				</ActionIcon>
