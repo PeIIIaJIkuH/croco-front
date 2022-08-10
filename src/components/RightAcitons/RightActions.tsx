@@ -112,7 +112,7 @@ export const RightActions: FC = observer(() => {
 			<div className={s.copyButton}>
 				<ActionIcon
 					size='lg' color='white' className={s.button}
-					onClick={() => copy(`http://localhost:3000/room/${socketState.roomId}`)}
+					onClick={() => copy(`${process.env.CROCO_URL || 'http://localhost:3000'}/room/${socketState.roomId}`)}
 				>
 					{copied ? <IconClipboardCheck color='white'/> : <IconClipboardCopy color='white'/>}
 				</ActionIcon>

@@ -20,7 +20,7 @@ class SocketState {
 	}
 
 	initSocket() {
-		this.socket = io('http://localhost:5000/canvas')
+		this.socket = io(`${process.env.CROCO_API_URL || 'http://localhost:5000'}/canvas`)
 	}
 }
 
