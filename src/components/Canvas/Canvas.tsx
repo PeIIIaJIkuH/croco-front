@@ -148,7 +148,6 @@ export const Canvas: FC = observer(() => {
 	useEffect(() => {
 		if (!socketState.socket) return
 		socketState.socket.on('drawToClient', (drawing: CanvasDrawing) => {
-			console.log('-------------', drawing)
 			drawPaint(drawing)
 		})
 
