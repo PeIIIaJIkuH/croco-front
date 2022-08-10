@@ -12,6 +12,7 @@ class SocketState {
 	}
 
 	setRoomId(id: string | null) {
+		if (id === this.roomId) return
 		this.roomId = id
 		if (id) {
 			this.socket?.emit('room', id)
