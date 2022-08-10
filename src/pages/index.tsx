@@ -11,6 +11,16 @@ const Home: NextPage = observer(() => {
 		socketState.reset()
 	}, [])
 
+	useEffect(() => {
+		const id = window.setInterval(() => {
+			fetch('https://croco-back.herokuapp.com/ping')
+		}, 29 * 30000)
+
+		return () => {
+			window.clearInterval(id)
+		}
+	}, [])
+
 	return (
 		<CreateRoom/>
 	)
