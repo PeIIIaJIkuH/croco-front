@@ -1,6 +1,6 @@
 import {MantineColor} from '@mantine/core'
 import {makeAutoObservable} from 'mobx'
-import {CanvasAction, CanvasThickness, CanvasType} from '../types'
+import {CanvasAction, CanvasThickness, CanvasType, RoomActions} from '../types'
 
 class CanvasState {
 	paintCanvas: HTMLCanvasElement | null = null
@@ -33,6 +33,12 @@ class CanvasState {
 
 	setScale(scale: number) {
 		this.scale = scale
+	}
+
+	setActions({undoList, redoList}: RoomActions) {
+		this.undoList = undoList
+		this.redoList = redoList
+		this.drawFromUndoList()
 	}
 
 	resetRedoList() {

@@ -22,3 +22,8 @@ export type UserType = 'host' | 'guest'
 export interface IFormValues {
 	name: string
 }
+
+export interface RoomActions {
+	undoList: CanvasAction[]
+	redoList: CanvasAction[]
+}

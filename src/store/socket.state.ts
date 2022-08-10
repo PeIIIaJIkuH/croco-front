@@ -11,12 +11,8 @@ class SocketState {
 		this.initSocket()
 	}
 
-	setRoomId(id: string | null) {
-		if (id === this.roomId) return
-		this.roomId = id
-		if (id) {
-			this.socket?.emit('room', id)
-		}
+	setRoomId(roomId: string | null) {
+		this.roomId = roomId
 	}
 
 	reset() {

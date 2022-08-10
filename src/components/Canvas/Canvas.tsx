@@ -5,7 +5,7 @@ import {FC, useEffect, useRef} from 'react'
 import canvasState from '../../store/canvas.state'
 import socketState from '../../store/socket.state'
 import userState from '../../store/user.state'
-import {CanvasDrawing, CanvasPoint} from '../../types'
+import {CanvasDrawing, CanvasPoint, RoomActions} from '../../types'
 import s from './Canvas.module.css'
 
 export const Canvas: FC = observer(() => {
@@ -152,7 +152,6 @@ export const Canvas: FC = observer(() => {
 		})
 
 		socketState.socket.on('undoToClient', () => {
-			console.log('undo')
 			canvasState.undo()
 		})
 
@@ -164,14 +163,39 @@ export const Canvas: FC = observer(() => {
 			canvasState.reset()
 		})
 
+		socketState.socket.on('loadActionsToClient', (actions: RoomActions) => {
+			actions && canvasState.setActions(actions)
+		})
+
 		return () => {
 			socketState.socket?.off('drawToClient')
 			socketState.socket?.off('undoToClient')
 			socketState.socket?.off('redoToClient')
 			socketState.socket?.off('resetToClient')
+			socketState.socket?.off('loadActions')
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [socketState.socket])
+
+	useEffect(() => {
+		const onUnload = () => {
+			socketState.socket?.emit('leaveRoom')
+		}
+
+		socketState.socket?.emit('joinRoom', socketState.roomId)
+		window.addEventListener('beforeunload', onUnload)
+
+		return () => {
+			window.removeEventListener('beforeunload', onUnload)
+		}
+	}, [])
+
+	useEffect(() => {
+		if (!userState.isHost) {
+			socketState.socket?.emit('loadActionsToServer', socketState.roomId)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [userState.isHost])
 
 	useHotkeys([
 		['ctrl+Z', () => {
@@ -202,5 +226,3 @@ export const Canvas: FC = observer(() => {
 		</div>
 	)
 })
-
-// TODO: load initial state of the board
